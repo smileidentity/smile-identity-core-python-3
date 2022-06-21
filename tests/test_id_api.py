@@ -101,14 +101,9 @@ class TestIdApi(unittest.TestCase):
         self.assertEqual(ve.exception.args[0], "key id_number cannot be empty")
 
     def get_id_response(self, signature=False):
-        if signature:
-            sec_timestamp = self.signatureObj.generate_signature(
-                timestamp=datetime.now().isoformat()
-            )
-        else:
-            sec_timestamp = self.signatureObj.generate_sec_key(
-                timestamp=int(time.time())
-            )
+        sec_timestamp = self.signatureObj.generate_signature(
+            timestamp=datetime.now().isoformat()
+        )
         return {
             "JSONVersion": "1.0.0",
             "SmileJobID": "0000000324",
@@ -138,9 +133,7 @@ class TestIdApi(unittest.TestCase):
             "FullData": {},
             "Source": "ID API",
             "timestamp": sec_timestamp.get("timestamp"),
-            "signature": sec_timestamp.get("signature")
-            if signature
-            else sec_timestamp.get("sec_key"),
+            "signature": sec_timestamp.get("signature"),
         }
 
     @staticmethod
@@ -235,8 +228,8 @@ class TestIdApi(unittest.TestCase):
 
     def test_validate_return_data(self):
         self.__reset_params()
-        timestamp = int(time.time())
-        sec_timestamp = self.signatureObj.generate_sec_key(timestamp=timestamp)
+        timestamp=datetime.now().isoformat()
+        sec_timestamp = self.signatureObj.generate_signature(timestamp=timestamp)
         with patch("requests.post") as mocked_post:
             mocked_post.return_value.status_code = 200
             mocked_post.return_value.ok = True

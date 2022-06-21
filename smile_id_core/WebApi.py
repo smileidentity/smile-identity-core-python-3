@@ -136,26 +136,26 @@ class WebApi:
         self, user_id: str, job_id: str, product: str, timestamp=None, callback_url=None
     ):
 
-        sec_params = Signature(self.partner_id, self.api_key).generate_signature(
+        sig_params = Signature(self.partner_id, self.api_key).generate_signature(
             timestamp or datetime.now().isoformat()
         )
 
         return WebApi.execute_http(
             f"{self.url}/token",
             {
-                **sec_params,
+                **sig_params,
                 "user_id": user_id,
                 "job_id": job_id,
                 "product": product,
                 "callback_url": callback_url or self.call_back_url,
                 "partner_id": self.partner_id,
+                "source_sdk": "PYTHON",
+                "source_sdk_version": "2.0.0",
             },
         )
 
     def _get_security_key_params(self, options_params):
-        return get_signature(
-            self.partner_id, self.api_key, options_params.get("signature")
-        )
+        return get_signature(self.partner_id, self.api_key)
 
     def __call_id_api(
         self,
@@ -186,10 +186,6 @@ class WebApi:
                 "Please choose to either get your response via the callback or job status query"
             )
 
-    def __get_sec_key(self):
-        sec_key_gen = Signature(self.partner_id, self.api_key)
-        return sec_key_gen.generate_sec_key()
-
     def __prepare_prep_upload_payload(
         self, partner_params: Dict, sec_params: Dict, use_enrolled_image
     ):
@@ -203,6 +199,8 @@ class WebApi:
             "callback_url": self.call_back_url,
             "use_enrolled_image": use_enrolled_image,
             **sec_params,
+            "source_sdk": "PYTHON",
+            "source_sdk_version": "2.0.0",
         }
 
     def poll_job_status(
